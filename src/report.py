@@ -12,10 +12,13 @@ Sections required by the spec:
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 from statistics import mean
 
-from src.paths import OPS_REPORT, ensure_artifacts_dir
+from src.paths import (
+    CLARIFICATIONS, DRAFT_REVIEWS, EXPECTED_ROUTES, OPS_REPORT, ensure_artifacts_dir,
+)
 
 
 def _route_distribution_table(final_routes: list[dict]) -> str:
@@ -75,6 +78,45 @@ def _review_section(review_queue: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _stretch_section(final_routes: list[dict]) -> str:
+    """Summarise the stretch artifacts if they exist on disk."""
+    lines: list[str] = []
+
+    if DRAFT_REVIEWS.exists():
+        reviews = json.loads(DRAFT_REVIEWS.read_text(encoding="utf-8"))
+        ship = sum(1 for r in reviews if r.get("recommendation") == "ship")
+        edit = sum(1 for r in reviews if r.get("recommendation") == "edit")
+        block = sum(1 for r in reviews if r.get("recommendation") == "block")
+        lines.append(
+            f"- **Self-check pass (`draft_reviews.json`):** "
+            f"{ship} ship / {edit} edit / {block} block "
+            f"(reviewed {len(reviews)} drafts)."
+        )
+
+    if CLARIFICATIONS.exists():
+        clars = json.loads(CLARIFICATIONS.read_text(encoding="utf-8"))
+        lines.append(
+            f"- **Clarification drafts (`clarifications.json`):** {len(clars)} "
+            f"generated for INSUFFICIENT_CONTEXT tickets."
+        )
+
+    if EXPECTED_ROUTES.exists():
+        expected = json.loads(EXPECTED_ROUTES.read_text(encoding="utf-8"))
+        expected_by_id = {e["ticket_id"]: e["expected_route"] for e in expected}
+        actual_by_id = {r["ticket_id"]: r["final_route"] for r in final_routes}
+        common = expected_by_id.keys() & actual_by_id.keys()
+        if common:
+            correct = sum(1 for tid in common if expected_by_id[tid] == actual_by_id[tid])
+            lines.append(
+                f"- **Offline route accuracy (`expected_routes.json`):** "
+                f"{correct}/{len(common)} ({correct / len(common):.0%})."
+            )
+
+    if not lines:
+        return "_No stretch artifacts produced this run._"
+    return "\n".join(lines)
+
+
 def render_report(
     *,
     final_routes: list[dict],
@@ -128,6 +170,10 @@ grounded; the OpenAI provider is prompted to do the same.
 ## Human Review / Escalation Queue
 
 {_review_section(review_queue)}
+
+## Stretch Artifacts
+
+{_stretch_section(final_routes)}
 
 ## Safety Constraints
 

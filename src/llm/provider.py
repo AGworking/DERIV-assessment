@@ -57,7 +57,84 @@ class MockProvider(LLMProvider):
                 "confidence": "low",
             })
 
+        task = payload.get("task", "draft")
+        if task == "self_check":
+            return self._build_self_check(payload)
+        if task == "clarify":
+            return self._build_clarification(payload)
+        # Default: draft a customer reply.
         return self._build_reply(payload)
+
+    # -- task: self_check -------------------------------------------------
+
+    def _build_self_check(self, payload: dict) -> str:
+        """Conservative deterministic self-check.
+
+        The mock can't actually 'reason' about a draft, so it flags structural
+        issues rather than semantic ones. Real grading happens when
+        LLM_PROVIDER=openai is enabled.
+        """
+        draft = payload.get("draft_reply", "")
+        cited = set(payload.get("used_article_ids") or [])
+        snippets = payload.get("snippets", [])
+        allowed_ids = {s["article_id"] for s in snippets}
+
+        issues: list[str] = []
+
+        if not draft.strip():
+            issues.append("Draft is empty.")
+        if not cited:
+            issues.append("Draft cites no article_ids — every AI reply must reference at least one KB source.")
+        unknown = cited - allowed_ids
+        if unknown:
+            issues.append(
+                f"Draft cites article_ids that were not in the retrieved evidence: {sorted(unknown)}."
+            )
+
+        # Light keyword check for promises the spec says must not be made.
+        forbidden_promises = [
+            ("refund", "Draft mentions 'refund' — refunds require finance team review and cannot be promised."),
+            ("immediately", "Draft promises 'immediate' action — escalations may be required first."),
+            ("guarantee", "Draft uses the word 'guarantee' — avoid absolute promises."),
+        ]
+        lower = draft.lower()
+        for word, msg in forbidden_promises:
+            if word in lower:
+                issues.append(msg)
+
+        supported = not issues
+        recommendation = "ship" if supported else "edit"
+
+        return json.dumps({
+            "supported": supported,
+            "issues": issues,
+            "recommendation": recommendation,
+        })
+
+    # -- task: clarify ----------------------------------------------------
+
+    def _build_clarification(self, payload: dict) -> str:
+        subject = (payload.get("subject") or "").strip()
+        message = (payload.get("message") or "").strip()
+
+        question = (
+            "Thanks for reaching out. We need a bit more information to help — "
+            "could you share what you were trying to do, any error message you saw, "
+            "and a reference number or screenshot if available?"
+        )
+
+        suggested = [
+            "exact error message (if any)",
+            "transaction reference or order ID",
+            "screenshot of the issue",
+            "the email address on file",
+        ]
+        return json.dumps({
+            "clarification_question": question,
+            "suggested_info_to_request": suggested,
+            "context_subject": subject,
+            "context_message": message[:200],
+        })
 
     def _build_reply(self, payload: dict) -> str:
         subject = payload.get("subject", "").strip()

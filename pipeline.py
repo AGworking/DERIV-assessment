@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import sys
 
+from src.clarify import generate_clarifications
 from src.classify import classify_tickets
 from src.draft import generate_drafts
 from src.llm.logger import reset_log
@@ -35,6 +36,7 @@ from src.report import render_report
 from src.retrieve import retrieve_candidates
 from src.review_queue import build_review_queue
 from src.route import decide_final_routes
+from src.self_check import review_drafts
 
 
 def _log(stage: str, msg: str = "") -> None:
@@ -79,6 +81,20 @@ def main() -> int:
 
     review_queue = build_review_queue(final_routes, retrieval, tickets)
     _log("REVIEW_QUEUE_BUILT", f"{len(review_queue)} tickets queued for human review")
+
+    # --- Stretch goals ---
+    draft_reviews = review_drafts(drafts, retrieval, tickets, articles)
+    unsupported = sum(1 for r in draft_reviews if not r.get("supported"))
+    _log(
+        "DRAFTS_SELF_CHECKED",
+        f"{len(draft_reviews)} drafts reviewed, {unsupported} flagged for edit/block",
+    )
+
+    clarifications = generate_clarifications(final_routes, tickets)
+    _log(
+        "CLARIFICATIONS_GENERATED",
+        f"{len(clarifications)} clarification drafts for INSUFFICIENT_CONTEXT tickets",
+    )
 
     render_report(
         final_routes=final_routes, retrieval=retrieval, drafts=drafts,

@@ -1,0 +1,12 @@
+[
+  {"ticket_id": "t_001", "expected_route": "AUTO_DRAFT",          "rationale": "Deposit query — non-policy, KB has safe_for_ai=true article (kb_001)."},
+  {"ticket_id": "t_002", "expected_route": "ESCALATE_POLICY",     "rationale": "Account deletion request — kb_002 is safe_for_ai=false."},
+  {"ticket_id": "t_003", "expected_route": "AUTO_DRAFT",          "rationale": "KYC upload failure — kb_003 covers supported formats."},
+  {"ticket_id": "t_004", "expected_route": "AUTO_DRAFT",          "rationale": "Password reset email missing — kb_004 covers spam/delay troubleshooting."},
+  {"ticket_id": "t_005", "expected_route": "INSUFFICIENT_CONTEXT","rationale": "Message is only 'help please' — no actionable detail."},
+  {"ticket_id": "t_006", "expected_route": "ESCALATE_RISK",       "rationale": "Reports unauthorized transaction / fraud — security incident."},
+  {"ticket_id": "t_007", "expected_route": "AUTO_DRAFT",          "rationale": "Withdrawal pending question — kb_007 covers expected processing times."},
+  {"ticket_id": "t_008", "expected_route": "ESCALATE_POLICY",     "rationale": "Refund request — kb_006 is safe_for_ai=false (finance team handles)."},
+  {"ticket_id": "t_009", "expected_route": "AUTO_DRAFT",          "rationale": "2FA SMS code not arriving — kb_005 covers troubleshooting."},
+  {"ticket_id": "t_010", "expected_route": "INSUFFICIENT_CONTEXT","rationale": "Subject 'not working' + body 'it's broken' — too generic to act on."}
+]
