@@ -24,6 +24,11 @@ from __future__ import annotations
 
 import sys
 
+from src.env import load_env
+
+# Load .env BEFORE importing any module that reads env vars at import time.
+load_env()
+
 from src.clarify import generate_clarifications
 from src.classify import classify_tickets
 from src.draft import generate_drafts

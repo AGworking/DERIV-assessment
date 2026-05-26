@@ -16,10 +16,30 @@ python validate.py     # checks artifacts are well-formed
 
 ## LLM mode
 
-- **Default**: `MockProvider` — produces grounded drafts by templating retrieved KB content. Runs on a clean checkout with zero env setup.
-- **OpenAI**: set `LLM_PROVIDER=openai` and `OPENAI_API_KEY=…` to switch to real OpenAI calls.
+The provider is controlled by the **`LLM_PROVIDER`** feature flag:
 
-Both paths log every call to `artifacts/llm_calls.jsonl`.
+- `LLM_PROVIDER=mock` *(default)* — `MockProvider` templates retrieved KB content into grounded drafts. No network, no key required.
+- `LLM_PROVIDER=openai` — real OpenAI calls (requires `OPENAI_API_KEY`).
+
+### Configuring via `.env`
+
+Copy `.env.example` to `.env` (already gitignored) and fill in values:
+
+```bash
+cp .env.example .env
+# edit .env, set LLM_PROVIDER=openai and OPENAI_API_KEY=sk-...
+python pipeline.py
+```
+
+Variables:
+
+| Variable | Required when | Default | Purpose |
+|---|---|---|---|
+| `LLM_PROVIDER` | always optional | `mock` | feature flag: `mock` or `openai` |
+| `OPENAI_API_KEY` | `LLM_PROVIDER=openai` | — | OpenAI auth |
+| `OPENAI_MODEL` | optional | `gpt-4o-mini` | model override for the OpenAI path |
+
+Both paths log every call to `artifacts/llm_calls.jsonl` (the `provider` field tells you which path ran).
 
 ## Final routes
 
