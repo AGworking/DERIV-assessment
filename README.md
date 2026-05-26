@@ -166,24 +166,31 @@ DERIV/
 │   ├── config/                     boring infrastructure
 │   │   ├── env.py                  .env loader (with stdlib fallback)
 │   │   └── paths.py                every artifact path in one place
-│   ├── llm/                        LLM provider abstraction
-│   │   ├── base.py                 LLMProvider ABC (one method: generate)
-│   │   ├── mock.py                 MockProvider — deterministic templater
-│   │   ├── openai_provider.py      OpenAIProvider — real OpenAI calls
-│   │   ├── provider.py             get_provider() factory (reads LLM_PROVIDER)
-│   │   └── logger.py               append-only writer for llm_calls.jsonl
-│   └── stages/                     one module per pipeline stage
-│       ├── load.py                 schema + uniqueness validation
-│       ├── normalise.py            lowercased text, lengths, derived flags
-│       ├── classify.py             keyword/regex rules → intent + urgency + flags
-│       ├── retrieve.py             sklearn TF-IDF cosine over KB, top-3 per ticket
-│       ├── route.py                safety gate — combines rules + retrieval → final route
-│       ├── draft.py                LLM draft for AUTO_DRAFT tickets only
-│       ├── self_check.py           second LLM pass critiquing each draft
-│       ├── clarify.py              clarification questions for INSUFFICIENT_CONTEXT
-│       ├── review_queue.py         every non-AUTO_DRAFT ticket + next action
-│       └── report.py               renders ops_report.md
+│   ├── deterministic/              ★ pure-Python pipeline stages — NO LLM calls
+│   │   ├── load.py                 schema + uniqueness validation
+│   │   ├── normalise.py            lowercased text, lengths, derived flags
+│   │   ├── classify.py             keyword/regex rules → intent + urgency + flags
+│   │   ├── retrieve.py             sklearn TF-IDF cosine over KB, top-3 per ticket
+│   │   ├── route.py                safety gate — combines rules + retrieval → final route
+│   │   ├── review_queue.py         every non-AUTO_DRAFT ticket + next action
+│   │   └── report.py               renders ops_report.md
+│   └── llm/                        ★ everything that touches the LLM lives here
+│       ├── base.py                 LLMProvider ABC (one method: generate)
+│       ├── mock.py                 MockProvider — deterministic templater
+│       ├── openai_provider.py      OpenAIProvider — real OpenAI calls
+│       ├── provider.py             get_provider() factory (reads LLM_PROVIDER)
+│       ├── logger.py               append-only writer for llm_calls.jsonl
+│       └── stages/                 pipeline stages that issue LLM calls
+│           ├── draft.py            LLM draft for AUTO_DRAFT tickets only
+│           ├── self_check.py       second LLM pass critiquing each draft
+│           └── clarify.py          clarification questions for INSUFFICIENT_CONTEXT
 └── artifacts/                      all generated files (gitignored)
+
+The folder boundary is the safety contract: nothing under `src/deterministic/`
+may import from `src/llm/*`. The pipeline orchestrator (`pipeline.py`) runs
+every deterministic stage first, only then asks `get_provider()` for an LLM,
+and only then runs the `src/llm/stages/*` modules — and only on tickets the
+deterministic layer cleared.
 ```
 
 ---
@@ -198,7 +205,7 @@ The pipeline blocks the LLM from drafting whenever **any** of these hold — all
 4. The message is too short or generic to act on (`needs_more_context`).
 5. The top retrieval cosine similarity is below `0.10` — evidence is too weak to ground a confident reply.
 
-These checks happen in `src/stages/classify.py` and `src/stages/route.py` *before* any LLM call. The LLM is downstream of the decision, not part of it.
+These checks happen in `src/deterministic/ + src/llm/stages/classify.py` and `src/deterministic/ + src/llm/stages/route.py` *before* any LLM call. The LLM is downstream of the decision, not part of it.
 
 When the LLM does draft, the prompt:
 - includes only the retrieved KB snippets (no other context)
@@ -207,7 +214,7 @@ When the LLM does draft, the prompt:
 - requires a clarifying question instead of guessing if information is missing
 - explicitly forbids promising refunds, account deletions, or other irreversible actions
 
-The self-check stage (`src/stages/self_check.py`) runs a *second* LLM pass that critiques the first draft, looking for unsupported claims or missing caveats. The review is written to `draft_reviews.json` — it never overwrites the original draft.
+The self-check stage (`src/deterministic/ + src/llm/stages/self_check.py`) runs a *second* LLM pass that critiques the first draft, looking for unsupported claims or missing caveats. The review is written to `draft_reviews.json` — it never overwrites the original draft.
 
 ---
 
@@ -243,7 +250,7 @@ Re-running `python pipeline.py` against a swapped fixture set will produce a fre
 
 ## Extending the system
 
-**Add a new intent**: edit `INTENT_PATTERNS` in `src/stages/classify.py`. Add the new key to the priority list at the bottom of `_detect_intent` if order matters.
+**Add a new intent**: edit `INTENT_PATTERNS` in `src/deterministic/ + src/llm/stages/classify.py`. Add the new key to the priority list at the bottom of `_detect_intent` if order matters.
 
 **Add a new KB article**: append to `kb.json`. The TF-IDF index is rebuilt every run, so the new article is picked up automatically. Set `safe_for_ai: false` for policy topics.
 
@@ -254,7 +261,7 @@ Re-running `python pipeline.py` against a swapped fixture set will produce a fre
 
 Three small files, no other code touched. The drafts / self-check / clarification stages will all use the new provider automatically.
 
-**Tighten the safety policy**: the route decision precedence lives at the top of `src/stages/route.py:_decide` as a numbered comment block. Add or reorder rules there; every change shows up in `final_routes.json[*].reason` so it's auditable.
+**Tighten the safety policy**: the route decision precedence lives at the top of `src/deterministic/ + src/llm/stages/route.py:_decide` as a numbered comment block. Add or reorder rules there; every change shows up in `final_routes.json[*].reason` so it's auditable.
 
 ---
 

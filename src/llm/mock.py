@@ -6,9 +6,9 @@ pipeline runs end-to-end on a clean checkout.
 
 The mock dispatches on `payload["task"]` so the same `.generate()` call handles
 all three downstream stages:
-    - draft         (src/stages/draft.py)
-    - self_check    (src/stages/self_check.py)
-    - clarify       (src/stages/clarify.py)
+    - draft         (src/llm/stages/draft.py)
+    - self_check    (src/llm/stages/self_check.py)
+    - clarify       (src/llm/stages/clarify.py)
 
 For the real LLM path (LLMProvider=openai), see openai_provider.py.
 """

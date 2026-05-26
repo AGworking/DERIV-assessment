@@ -32,18 +32,18 @@ from src.config.env import load_env
 load_env()
 
 from src.config.paths import ensure_artifacts_dir
+from src.deterministic.classify import classify_tickets
+from src.deterministic.load import ValidationError, load_inputs
+from src.deterministic.normalise import normalise_tickets
+from src.deterministic.report import render_report
+from src.deterministic.retrieve import retrieve_candidates
+from src.deterministic.review_queue import build_review_queue
+from src.deterministic.route import decide_final_routes
 from src.llm.logger import reset_log
 from src.llm.provider import get_provider
-from src.stages.classify import classify_tickets
-from src.stages.clarify import generate_clarifications
-from src.stages.draft import generate_drafts
-from src.stages.load import ValidationError, load_inputs
-from src.stages.normalise import normalise_tickets
-from src.stages.report import render_report
-from src.stages.retrieve import retrieve_candidates
-from src.stages.review_queue import build_review_queue
-from src.stages.route import decide_final_routes
-from src.stages.self_check import review_drafts
+from src.llm.stages.clarify import generate_clarifications
+from src.llm.stages.draft import generate_drafts
+from src.llm.stages.self_check import review_drafts
 
 
 def _stage(name: str, msg: str = "") -> None:

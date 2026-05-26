@@ -14,7 +14,9 @@ This matters because:
 - **Replayability.** A deterministic decision is the same every run. The LLM provider can be swapped (mock ↔ openai) and the **routes stay identical** — only the *quality* of the AI-drafted replies changes.
 - **Safety.** A non-deterministic decider is impossible to audit retroactively. By isolating the LLM to drafting + critique, we can prove via code review that no policy-restricted ticket can ever reach the drafting stage.
 
-Concretely: a refund request (`safe_for_ai: false` on the KB article) is rejected by `src/stages/route.py:_decide`, **before** `src/stages/draft.py` even iterates that ticket. The LLM never sees it.
+Concretely: a refund request (`safe_for_ai: false` on the KB article) is rejected by `src/deterministic/route.py:_decide`, **before** `src/llm/stages/draft.py` even iterates that ticket. The LLM never sees it.
+
+The folder split makes this contract enforceable: nothing under `src/deterministic/` may import from `src/llm/*`. If a future change ever tried to consult the LLM in the routing decision, the import would have to cross the package boundary — a code-review smell that's much harder to miss than a subtle behavioural regression.
 
 ---
 
@@ -28,7 +30,7 @@ Concretely: a refund request (`safe_for_ai: false` on the KB article) is rejecte
 | `ESCALATE_RISK` | rules detect fraud / security intent | `review_queue.json` with security recommendation |
 | `INSUFFICIENT_CONTEXT` | message too short or contains only generic phrases | `clarifications.json` + `review_queue.json` |
 
-The decision logic is at `src/stages/route.py:_decide`, written as a numbered if/elif precedence list. First match wins.
+The decision logic is at `src/deterministic/route.py:_decide`, written as a numbered if/elif precedence list. First match wins.
 
 ---
 
@@ -36,7 +38,7 @@ The decision logic is at `src/stages/route.py:_decide`, written as a numbered if
 
 Following one ticket through every stage.
 
-### Stage 1 + 2: load + validate (`src/stages/load.py`)
+### Stage 1 + 2: load + validate (`src/deterministic/load.py`)
 
 ```json
 {
@@ -54,7 +56,7 @@ Following one ticket through every stage.
 
 Required fields present, `ticket_id` unique, `created_at` parses, `message` non-empty → **passes**.
 
-### Stage 3: normalise (`src/stages/normalise.py`)
+### Stage 3: normalise (`src/deterministic/normalise.py`)
 
 Adds lowercase versions for downstream regex / TF-IDF, plus derived fields:
 
@@ -70,7 +72,7 @@ Adds lowercase versions for downstream regex / TF-IDF, plus derived fields:
 }
 ```
 
-### Stage 4: rule-based classify (`src/stages/classify.py`)
+### Stage 4: rule-based classify (`src/deterministic/classify.py`)
 
 Regex over `text_lower` against `INTENT_PATTERNS`. Priority order matters here — `account_closure` is checked before `deposit`:
 
@@ -83,7 +85,7 @@ Regex over `text_lower` against `INTENT_PATTERNS`. Priority order matters here �
 
 Written to `routing.json`.
 
-### Stage 5 + 6: TF-IDF retrieval (`src/stages/retrieve.py`)
+### Stage 5 + 6: TF-IDF retrieval (`src/deterministic/retrieve.py`)
 
 The vectoriser is fit on the union of all KB documents and all ticket documents so the IDF vocabulary covers both. For `t_002`:
 
@@ -95,7 +97,7 @@ The vectoriser is fit on the union of all KB documents and all ticket documents 
 
 Critically, `kb_002.safe_for_ai = false` (it's a policy topic, handled by humans). That flag travels into `retrieval.json` so the safety gate can use it directly.
 
-### Stage 7: safety gate (`src/stages/route.py`)
+### Stage 7: safety gate (`src/deterministic/route.py`)
 
 Walking the precedence list:
 
@@ -111,9 +113,9 @@ This is the safety gate **catching the same hazard from two independent angles**
 
 ### Stage 8: drafting — **skipped**
 
-`src/stages/draft.py:generate_drafts` iterates `final_routes` and filters `if route["final_route"] != "AUTO_DRAFT": continue`. `t_002` is not in the AUTO_DRAFT set, so no LLM call happens for it. Verifiable in `llm_calls.jsonl` — no record with `"ticket_id": "t_002"`.
+`src/llm/stages/draft.py:generate_drafts` iterates `final_routes` and filters `if route["final_route"] != "AUTO_DRAFT": continue`. `t_002` is not in the AUTO_DRAFT set, so no LLM call happens for it. Verifiable in `llm_calls.jsonl` — no record with `"ticket_id": "t_002"`.
 
-### Stage 9: review queue (`src/stages/review_queue.py`)
+### Stage 9: review queue (`src/deterministic/review_queue.py`)
 
 `t_002` enters `review_queue.json` with the per-intent recommendation:
 
@@ -131,9 +133,9 @@ The spec accepts "token overlap, BM25-style scoring, TF-IDF cosine similarity, e
 
 - **Inspectable.** The score is the cosine of two sparse vectors and the matched-terms list shows *which* words drove the match. A reviewer can derive the same number with pen and paper.
 - **Zero infrastructure.** No model download, no API call, no cache. One `pip install scikit-learn` and it works on a clean checkout.
-- **Robust to swapped fixtures.** As long as the new tickets and KB share English vocabulary, retrieval still works. No hardcoded ticket IDs or wording anywhere in `src/stages/retrieve.py`.
+- **Robust to swapped fixtures.** As long as the new tickets and KB share English vocabulary, retrieval still works. No hardcoded ticket IDs or wording anywhere in `src/deterministic/retrieve.py`.
 
-The TF-IDF index is fit on the **union** of KB documents and ticket documents (`src/stages/retrieve.py` ~line 80). This is important — if we fit on the KB alone, a ticket-only word like "USD" or "topup" wouldn't appear in the vocabulary at all. Fitting on the union gives every meaningful word an IDF score.
+The TF-IDF index is fit on the **union** of KB documents and ticket documents (`src/deterministic/retrieve.py` ~line 80). This is important — if we fit on the KB alone, a ticket-only word like "USD" or "topup" wouldn't appear in the vocabulary at all. Fitting on the union gives every meaningful word an IDF score.
 
 Title and tags are concatenated **twice** when building each KB document — a cheap way to up-weight them relative to the article body. Matches in the title are more discriminating than matches in flavour text.
 

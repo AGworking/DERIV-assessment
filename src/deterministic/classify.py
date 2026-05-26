@@ -9,8 +9,8 @@ Produces:
   - needs_more_context (bool)
   - preliminary_route (one of the five final routes)
 
-This is intentionally non-LLM. The safety gate (src/stages/route.py) refines
-the preliminary route using retrieval evidence.
+This is intentionally non-LLM. The safety gate (src/deterministic/route.py)
+refines the preliminary route using retrieval evidence.
 
 The keyword groups are deliberately broad-but-specific English phrases so
 that swapped-in fixtures still trigger correctly.
