@@ -1,0 +1,142 @@
+[
+  {
+    "ticket_id": "t_001",
+    "created_at": "2026-05-01T09:15:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Deposit still not showing",
+    "message": "I made a bank transfer 3 hours ago but my balance still says 0. What should I do?",
+    "attachments": [],
+    "metadata": {
+      "country": "MY",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_002",
+    "created_at": "2026-05-01T09:18:00Z",
+    "channel": "web_form",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Please close my account now",
+    "message": "I want my account deleted immediately. Also tell me what happens to my remaining balance.",
+    "attachments": [],
+    "metadata": {
+      "country": "GB",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_003",
+    "created_at": "2026-05-01T09:22:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "vip",
+    "subject": "Can't verify identity",
+    "message": "My document upload keeps failing with unsupported format. I already tried twice.",
+    "attachments": ["upload_error.png"],
+    "metadata": {
+      "country": "NG",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_004",
+    "created_at": "2026-05-01T09:30:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Password reset",
+    "message": "I forgot my password and the reset email is not arriving.",
+    "attachments": [],
+    "metadata": {
+      "country": "IN",
+      "logged_in": false
+    }
+  },
+  {
+    "ticket_id": "t_005",
+    "created_at": "2026-05-01T09:42:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "help",
+    "message": "help please",
+    "attachments": [],
+    "metadata": {
+      "country": "ID",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_006",
+    "created_at": "2026-05-01T09:51:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "vip",
+    "subject": "URGENT: unauthorized transaction on my account",
+    "message": "Someone has accessed my account and made an unauthorized withdrawal of 2,000 USD. I did not authorize this. This looks like fraud. Please freeze my account immediately and investigate.",
+    "attachments": ["transaction_screenshot.png"],
+    "metadata": {
+      "country": "DE",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_007",
+    "created_at": "2026-05-01T10:05:00Z",
+    "channel": "web_form",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Withdrawal still pending after 2 days",
+    "message": "I requested a withdrawal of 500 USD to my bank account two days ago. The status is still 'pending'. Is this normal and how long should I expect it to take?",
+    "attachments": [],
+    "metadata": {
+      "country": "AU",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_008",
+    "created_at": "2026-05-01T10:12:00Z",
+    "channel": "email",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "Refund request for last deposit",
+    "message": "I want a full refund for my deposit of 300 USD made yesterday. I changed my mind and no longer want to use the platform. Please process the refund immediately.",
+    "attachments": [],
+    "metadata": {
+      "country": "CA",
+      "logged_in": true
+    }
+  },
+  {
+    "ticket_id": "t_009",
+    "created_at": "2026-05-01T10:20:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "2FA code not arriving",
+    "message": "The two-factor authentication SMS code is not arriving on my phone. I have waited 10 minutes and tried resending twice. I cannot log in.",
+    "attachments": [],
+    "metadata": {
+      "country": "BR",
+      "logged_in": false
+    }
+  },
+  {
+    "ticket_id": "t_010",
+    "created_at": "2026-05-01T10:33:00Z",
+    "channel": "chat",
+    "language": "en",
+    "customer_tier": "standard",
+    "subject": "not working",
+    "message": "it's broken",
+    "attachments": [],
+    "metadata": {
+      "country": "PH",
+      "logged_in": true
+    }
+  }
+]
