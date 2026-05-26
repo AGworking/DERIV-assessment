@@ -15,7 +15,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from src.paths import RETRIEVAL, ensure_artifacts_dir
+from src.config.paths import RETRIEVAL, ensure_artifacts_dir
 
 
 TOP_K = 3

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import re
 
-from src.paths import TICKETS_NORMALISED, ensure_artifacts_dir
+from src.config.paths import TICKETS_NORMALISED, ensure_artifacts_dir
 
 _WS_RE = re.compile(r"\s+")
 

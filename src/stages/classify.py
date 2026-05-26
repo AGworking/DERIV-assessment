@@ -9,7 +9,7 @@ Produces:
   - needs_more_context (bool)
   - preliminary_route (one of the five final routes)
 
-This is intentionally non-LLM. The safety gate (src/route.py) refines
+This is intentionally non-LLM. The safety gate (src/stages/route.py) refines
 the preliminary route using retrieval evidence.
 
 The keyword groups are deliberately broad-but-specific English phrases so
@@ -22,7 +22,7 @@ import json
 import re
 from typing import Iterable
 
-from src.paths import ROUTING, ensure_artifacts_dir
+from src.config.paths import ROUTING, ensure_artifacts_dir
 
 
 # Keyword groups per intent. We match whole-word patterns against text_lower.

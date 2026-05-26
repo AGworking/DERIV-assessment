@@ -23,7 +23,7 @@ from typing import Iterable
 
 from src.llm.logger import log_call, prompt_hash
 from src.llm.provider import get_provider
-from src.paths import (
+from src.config.paths import (
     DRAFTS, FINAL_ROUTES, KB_IN, RETRIEVAL, TICKETS_IN, ensure_artifacts_dir,
 )
 

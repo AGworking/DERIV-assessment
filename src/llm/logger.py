@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
-from src.paths import LLM_CALLS, ensure_artifacts_dir
+from src.config.paths import LLM_CALLS, ensure_artifacts_dir
 
 
 def prompt_hash(text: str) -> str:

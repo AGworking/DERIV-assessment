@@ -16,7 +16,7 @@ import json
 from collections import Counter
 from statistics import mean
 
-from src.paths import (
+from src.config.paths import (
     CLARIFICATIONS, DRAFT_REVIEWS, EXPECTED_ROUTES, OPS_REPORT, ensure_artifacts_dir,
 )
 

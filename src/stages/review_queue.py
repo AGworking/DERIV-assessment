@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 
-from src.paths import REVIEW_QUEUE, ensure_artifacts_dir
+from src.config.paths import REVIEW_QUEUE, ensure_artifacts_dir
 
 
 # Map (intent, route) → recommended action. Falls back to a per-route default.

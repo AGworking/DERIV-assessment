@@ -12,7 +12,7 @@ import json
 
 from src.llm.logger import log_call, prompt_hash
 from src.llm.provider import get_provider
-from src.paths import (
+from src.config.paths import (
     CLARIFICATIONS, FINAL_ROUTES, TICKETS_IN, ensure_artifacts_dir,
 )
 

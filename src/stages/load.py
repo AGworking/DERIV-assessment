@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from src.paths import KB_IN, TICKETS_IN
+from src.config.paths import KB_IN, TICKETS_IN
 
 
 REQUIRED_TICKET_FIELDS = {

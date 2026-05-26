@@ -17,7 +17,7 @@ import json
 
 from src.llm.logger import log_call, prompt_hash
 from src.llm.provider import get_provider
-from src.paths import (
+from src.config.paths import (
     DRAFT_REVIEWS, DRAFTS, KB_IN, RETRIEVAL, TICKETS_IN, ensure_artifacts_dir,
 )
 

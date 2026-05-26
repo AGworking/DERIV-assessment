@@ -11,9 +11,8 @@ and the pipeline uses real environment variables / defaults.
 from __future__ import annotations
 
 import os
-from pathlib import Path
 
-from src.paths import ROOT
+from src.config.paths import ROOT
 
 
 def load_env() -> None:

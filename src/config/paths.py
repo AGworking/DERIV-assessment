@@ -1,8 +1,15 @@
-"""Centralised file paths so every stage agrees on where artifacts live."""
+"""Centralised file paths so every stage agrees on where artifacts live.
+
+ROOT is the project root (the folder containing tickets.json, kb.json,
+pipeline.py, etc.). All inputs sit at ROOT; all generated artifacts sit
+under ROOT/artifacts/.
+"""
 
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+# This file lives at <ROOT>/src/config/paths.py, so the project root is
+# three parents up.
+ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "artifacts"
 
 # Inputs

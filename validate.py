@@ -24,7 +24,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from src.paths import (
+from src.config.paths import (
     CLARIFICATIONS, DRAFT_REVIEWS, DRAFTS, EXPECTED_ROUTES, FINAL_ROUTES,
     KB_IN, LLM_CALLS, OPS_REPORT, RETRIEVAL, REVIEW_QUEUE, TICKETS_IN,
     TICKETS_NORMALISED, ROUTING,

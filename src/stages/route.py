@@ -1,7 +1,7 @@
 """Stage: safety gate + final routing.
 
-Combines deterministic rules (src/classify.py) with retrieval evidence
-(src/retrieve.py) to produce the FINAL route for every ticket, with a
+Combines deterministic rules (src/stages/classify.py) with retrieval evidence
+(src/stages/retrieve.py) to produce the FINAL route for every ticket, with a
 human-readable reason and a list of top article IDs.
 
 This stage is deterministic. The LLM is downstream of it.
@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import json
 
-from src.paths import FINAL_ROUTES, ensure_artifacts_dir
+from src.config.paths import FINAL_ROUTES, ensure_artifacts_dir
 
 
 # Below this top-1 cosine similarity we treat retrieval as too weak to ground
